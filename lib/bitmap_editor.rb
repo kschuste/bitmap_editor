@@ -62,7 +62,7 @@ class BitmapEditor
     color = commands[3]
     isAlphaString?(color)
 
-    if (row > @bitmap.length || column > @bitmap[row - 1].length)
+    if (row > @bitmap.length || column > @bitmap[0].length)
       raise ArgumentError, 'coordinates outside bitmap'
     end
 
@@ -92,7 +92,7 @@ class BitmapEditor
       raise ArgumentError, 'beginning row index larger than ending row index'
     end
 
-    if (row1 > @bitmap.length || row2 > @bitmap.length || column > @bitmap[row1 - 1].length)
+    if (row1 > @bitmap.length || row2 > @bitmap.length || column > @bitmap[0].length)
       raise ArgumentError, 'coordinates outside bitmap'
     end
 
@@ -125,11 +125,11 @@ class BitmapEditor
       raise ArgumentError, 'beginning column index larger than ending column index'
     end
 
-    if (row > @bitmap.length || column1 > @bitmap[row - 1].length || column2 > @bitmap[row - 1].length)
+    if (row > @bitmap.length || column1 > @bitmap[0].length || column2 > @bitmap[0].length)
       raise ArgumentError, 'coordinates outside bitmap'
     end
 
-    while column1 <= column2 && column1 <= @bitmap[row].length do
+    while column1 <= column2 && column1 <= @bitmap[0].length do
       @bitmap[row - 1][column1 - 1] = color
       column1 = column1 + 1
     end
