@@ -20,39 +20,11 @@ class BitmapEditor
         when 'L'
           color_individual(commands)
         when 'V'
-          if commands.length != 5
-            puts 'invalid vertical color pixel command'
-            next
-          end
-          column = commands[1].to_i
-          row1 = commands[2].to_i
-          row2 = commands[3].to_i
-          color = commands[4]
-          if (isValidCoordinate?(column) && isValidCoordinate?(row1) && isValidCoordinate?(row2))
-            while row1 <= row2 && row1 <= @grid.length do
-              @grid[row1 - 1][column - 1] = color
-              row1 = row1 + 1
-            end
-          end
+          color_vertical(commands)
         when 'H'
-          if commands.length != 5
-            puts 'invalid vertical color pixel command'
-            next
-          end
-          column1 = commands[1].to_i
-          column2 = commands[2].to_i
-          row = commands[3].to_i
-          color = commands[4]
-          if (isValidCoordinate?(column1) && isValidCoordinate?(column2) && isValidCoordinate?(row))
-            while column1 <= column2 && column1 <= @grid[row].length do
-              @grid[row - 1][column1 - 1] = color
-              column1 = column1 + 1
-            end
-          end
+          color_horizontal(commands)
         when 'C'
-          rows = @grid.length
-          columns = @grid[0].length
-          @grid = Array.new(columns){Array.new(rows, 'O')}
+          clear()
         else
           raise ArgumentError, "unrecognised command"
       end
@@ -60,47 +32,104 @@ class BitmapEditor
   end
 
   def create(commands)
-    if commands.length != 3
-      raise ArgumentError, "invalid initialize command count"
-    end
+    isCommandCountValid?(commands, 3)
 
-    unless (isNumericString?(commands[1]) && isNumericString?(commands[2]))
-      raise ArgumentError, "non-numeric command provided"
-    end
+    isNumericString?(commands[1])
+    isNumericString?(commands[2])
 
     rows = commands[1].to_i
     columns = commands[2].to_i
 
-    unless (isValidCoordinate?(rows) && isValidCoordinate?(columns))
-      raise ArgumentError, "invalid initialize coordinates"
-    end
+    isValidCoordinate?(rows)
+    isValidCoordinate?(columns)
 
     @grid = Array.new(columns){Array.new(rows, 'O')}
   end
 
   def color_individual(commands)
-    if commands.length != 4
-      raise ArgumentError, "invalid color individual command count"
-    end
+    isBitmapValid?()
+    isCommandCountValid?(commands, 4)
 
-    unless (isNumericString?(commands[1]) && isNumericString?(commands[2]))
-      raise ArgumentError, "non-numeric command provided"
-    end
+    isNumericString?(commands[1])
+    isNumericString?(commands[2])
 
     row = commands[1].to_i
     column = commands[2].to_i
 
-    unless (isValidCoordinate?(row) && isValidCoordinate?(column))
-      raise ArgumentError, "invalid initialize coordinates"
-    end
+    isValidCoordinate?(row)
+    isValidCoordinate?(column)
 
     color = commands[3]
-    if row <= @grid.length && column <= @grid[row - 1].length
-      @grid[column - 1][row - 1] = color
+    isAlphaString?(color)
+
+    if (row > @grid.length || column > @grid[row - 1].length)
+      raise ArgumentError, 'coordinates outside bitmap'
+    end
+
+    @grid[column - 1][row - 1] = color
+  end
+
+  def color_vertical(commands)
+    isBitmapValid?()
+    isCommandCountValid?(commands, 5)
+
+    isNumericString?(commands[1])
+    isNumericString?(commands[2])
+    isNumericString?(commands[3])
+
+    column = commands[1].to_i
+    row1 = commands[2].to_i
+    row2 = commands[3].to_i
+
+    isValidCoordinate?(column)
+    isValidCoordinate?(row1)
+    isValidCoordinate?(row2)
+
+    color = commands[4]
+    isAlphaString?(color)
+
+    if (row1 > row2)
+      raise ArgumentError, 'beginning row index larger than ending row index'
+    end
+
+    if (row1 > @grid.length || row2 > @grid.length || column > @grid[row - 1].length)
+      raise ArgumentError, 'coordinates outside bitmap'
+    end
+
+    while row1 <= row2 && row1 <= @grid.length do
+      @grid[row1 - 1][column - 1] = color
+      row1 = row1 + 1
+    end
+  end
+
+  def color_horizontal(commands)
+    isBitmapValid?()
+    isCommandCountValid?(commands, 5)
+
+    isNumericString?(commands[1])
+    isNumericString?(commands[2])
+    isNumericString?(commands[3])
+
+    column1 = commands[1].to_i
+    column2 = commands[2].to_i
+    row = commands[3].to_i
+
+    isValidCoordinate?(column1)
+    isValidCoordinate?(column2)
+    isValidCoordinate?(row)
+
+    color = commands[4]
+    isAlphaString?(color)
+
+    while column1 <= column2 && column1 <= @grid[row].length do
+      @grid[row - 1][column1 - 1] = color
+      column1 = column1 + 1
     end
   end
 
   def print()
+    isBitmapValid?()
+
     @grid.each do |row|
       rowValue = ''
       row.each do |value|
@@ -110,16 +139,44 @@ class BitmapEditor
     end
   end
 
+  def clear()
+    isBitmapValid?()
+    rows = @grid.length
+    columns = @grid[0].length
+    @grid = Array.new(columns){Array.new(rows, 'O')}
+  end
+
   private
 
+  def isBitmapValid?
+    unless @grid
+      raise ArgumentError, "uninitialized bitmap"
+    end
+    return true
+  end
+
+  def isCommandCountValid?(commands, expectedCount)
+    if commands.length != expectedCount
+      raise ArgumentError, "invalid command count"
+    end
+    return true
+  end
+
+  def isAlphaString?(value)
+    if value =~ /[A-Za-z]/
+      return true
+    end
+    raise ArgumentError, "non-alpha command provided"
+  end
+
   def isNumericString?(value)
-    true if Integer(value) rescue false
+    true if Integer(value) rescue raise ArgumentError, "non-numeric command provided"
   end
 
   def isValidCoordinate?(coordinate)
     if (coordinate >= 1 && coordinate <= 250)
       return true
     end
-    return false
+    raise ArgumentError, "invalid coordinates"
   end
 end
