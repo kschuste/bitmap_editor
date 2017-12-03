@@ -12,6 +12,10 @@ describe BitmapEditor do
         bmp = BitmapEditor.new
       end
 
+      it 'throws exception with invalid file given' do
+        expect { bmp.run('spec/test_files/create/invalid_file.txt') }.to raise_error(ArgumentError, "please provide correct file")
+      end
+
       it 'throws exception with unrecognized command' do
         expect { bmp.run('spec/test_files/create/unrecognized_command.txt') }.to raise_error(ArgumentError, "unrecognised command")
       end

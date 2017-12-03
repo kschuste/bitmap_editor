@@ -7,14 +7,14 @@ class BitmapEditor
   end
 
   def run(file)
-    return puts "please provide correct file" if file.nil? || !File.exists?(file)
+    return raise ArgumentError, "please provide correct file" if file.nil? || !File.exists?(file)
     
     File.open(file).each do |line|
       line = line.chomp
       commands = line.split
       case commands[0]
         when 'S'
-          print()
+          show()
         when 'I'
           create(commands)
         when 'L'
@@ -135,7 +135,7 @@ class BitmapEditor
     end
   end
 
-  def print()
+  def show()
     isBitmapValid?()
 
     @bitmap.each do |row|
