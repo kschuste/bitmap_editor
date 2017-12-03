@@ -1,9 +1,9 @@
 class BitmapEditor
 
-  attr_accessor :grid
+  attr_accessor :bitmap
 
   def initialize()
-    @grid = nil
+    @bitmap = nil
   end
 
   def run(file)
@@ -43,7 +43,7 @@ class BitmapEditor
     isValidCoordinate?(rows)
     isValidCoordinate?(columns)
 
-    @grid = Array.new(columns){Array.new(rows, 'O')}
+    @bitmap = Array.new(columns){Array.new(rows, 'O')}
   end
 
   def color_individual(commands)
@@ -62,11 +62,11 @@ class BitmapEditor
     color = commands[3]
     isAlphaString?(color)
 
-    if (row > @grid.length || column > @grid[row - 1].length)
+    if (row > @bitmap.length || column > @bitmap[row - 1].length)
       raise ArgumentError, 'coordinates outside bitmap'
     end
 
-    @grid[column - 1][row - 1] = color
+    @bitmap[column - 1][row - 1] = color
   end
 
   def color_vertical(commands)
@@ -92,12 +92,12 @@ class BitmapEditor
       raise ArgumentError, 'beginning row index larger than ending row index'
     end
 
-    if (row1 > @grid.length || row2 > @grid.length || column > @grid[row - 1].length)
+    if (row1 > @bitmap.length || row2 > @bitmap.length || column > @bitmap[row1 - 1].length)
       raise ArgumentError, 'coordinates outside bitmap'
     end
 
-    while row1 <= row2 && row1 <= @grid.length do
-      @grid[row1 - 1][column - 1] = color
+    while row1 <= row2 && row1 <= @bitmap.length do
+      @bitmap[row1 - 1][column - 1] = color
       row1 = row1 + 1
     end
   end
@@ -121,8 +121,16 @@ class BitmapEditor
     color = commands[4]
     isAlphaString?(color)
 
-    while column1 <= column2 && column1 <= @grid[row].length do
-      @grid[row - 1][column1 - 1] = color
+    if (column1 > column2)
+      raise ArgumentError, 'beginning column index larger than ending column index'
+    end
+
+    if (row > @bitmap.length || column1 > @bitmap[row - 1].length || column2 > @bitmap[row - 1].length)
+      raise ArgumentError, 'coordinates outside bitmap'
+    end
+
+    while column1 <= column2 && column1 <= @bitmap[row].length do
+      @bitmap[row - 1][column1 - 1] = color
       column1 = column1 + 1
     end
   end
@@ -130,7 +138,7 @@ class BitmapEditor
   def print()
     isBitmapValid?()
 
-    @grid.each do |row|
+    @bitmap.each do |row|
       rowValue = ''
       row.each do |value|
         rowValue += value
@@ -141,15 +149,15 @@ class BitmapEditor
 
   def clear()
     isBitmapValid?()
-    rows = @grid.length
-    columns = @grid[0].length
-    @grid = Array.new(columns){Array.new(rows, 'O')}
+    rows = @bitmap.length
+    columns = @bitmap[0].length
+    @bitmap = Array.new(columns){Array.new(rows, 'O')}
   end
 
   private
 
   def isBitmapValid?
-    unless @grid
+    unless @bitmap
       raise ArgumentError, "uninitialized bitmap"
     end
     return true
@@ -163,7 +171,7 @@ class BitmapEditor
   end
 
   def isAlphaString?(value)
-    if value =~ /[A-Za-z]/
+    if value.match(/^[[:alpha:]]+$/)
       return true
     end
     raise ArgumentError, "non-alpha command provided"

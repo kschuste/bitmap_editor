@@ -13,7 +13,7 @@ describe BitmapEditor do
       end
 
       it 'throws exception with unrecognized command' do
-        expect { bmp.run('spec/test_files/unrecognized_command.txt') }.to raise_error(ArgumentError, "unrecognised command")
+        expect { bmp.run('spec/test_files/create/unrecognized_command.txt') }.to raise_error(ArgumentError, "unrecognised command")
       end
 
       it 'throws exception with invalid number of create commands' do
@@ -38,15 +38,29 @@ describe BitmapEditor do
 
       it 'initializes the instance with valid params' do
         bmp.run('spec/test_files/create/create_command.txt')
-        expect(bmp.grid.nil?).to eq(false)
-        expect(bmp.grid.length).to eq(10)
-        expect(bmp.grid[0].length).to eq(5)
+        expect(bmp.bitmap.nil?).to eq(false)
+        expect(bmp.bitmap.length).to eq(10)
+        expect(bmp.bitmap[0].length).to eq(5)
 
-        bmp.grid.each do |column|
+        bmp.bitmap.each do |column|
           column.each do |row|
             expect(row).to eq('O')
           end
         end
+      end
+
+      it 'initializes the bitmap with the maximum size' do
+        bmp.run('spec/test_files/create/create_max_command.txt')
+        expect(bmp.bitmap.nil?).to eq(false)
+        expect(bmp.bitmap.length).to eq(250)
+        expect(bmp.bitmap[0].length).to eq(250)
+      end
+
+      it 'initializes the bitmap with the minimum size' do
+        bmp.run('spec/test_files/create/create_min_command.txt')
+        expect(bmp.bitmap.nil?).to eq(false)
+        expect(bmp.bitmap.length).to eq(1)
+        expect(bmp.bitmap[0].length).to eq(1)
       end
     end
   end

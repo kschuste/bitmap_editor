@@ -12,6 +12,11 @@ describe BitmapEditor do
         bmp.run('spec/test_files/create/create_command.txt')
       end
 
+      it 'throws exception when bitmap has not been initialized' do
+        bmp.bitmap = nil
+        expect { bmp.run('spec/test_files/color_individual/color_individual_command.txt') }.to raise_error(ArgumentError, "uninitialized bitmap")
+      end
+
       it 'throws exception with invalid number of color individual commands' do
         expect { bmp.run('spec/test_files/color_individual/color_individual_invalid_command_count.txt') }.to raise_error(ArgumentError, "invalid command count")
       end
@@ -32,6 +37,14 @@ describe BitmapEditor do
         expect { bmp.run('spec/test_files/color_individual/color_individual_column_small_bounds.txt') }.to raise_error(ArgumentError, "invalid coordinates")
       end
 
+      it 'throws exception with row too large' do
+        expect { bmp.run('spec/test_files/color_individual/color_individual_row_large_bounds.txt') }.to raise_error(ArgumentError, "invalid coordinates")
+      end
+
+      it 'throws exception with column too large' do
+        expect { bmp.run('spec/test_files/color_individual/color_individual_column_large_bounds.txt') }.to raise_error(ArgumentError, "invalid coordinates")
+      end
+
       it 'throws exception with invalid color param' do
         expect { bmp.run('spec/test_files/color_individual/color_individual_invalid_color.txt') }.to raise_error(ArgumentError, "non-alpha command provided")
       end
@@ -46,7 +59,7 @@ describe BitmapEditor do
 
       it 'colors the coordinate correctly' do
         bmp.run('spec/test_files/color_individual/color_individual_command.txt')
-        expect(bmp.grid[2][0]).to eq('A')
+        expect(bmp.bitmap[2][0]).to eq('A')
       end
     end
   end
